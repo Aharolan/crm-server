@@ -21,3 +21,5 @@
 
 -- INSERT INTO INTERVIEWS(company_name, interview_date, job) 
 -- VALUES("Similar Web","15/06/2025","FE")
+
+DELETE FROM INTERVIEWS;
