@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./student_sqlite/candidate_list.db');
+const db = new sqlite3.Database('./student.sqlite/candidate_list.db');
 
 
 const get = (collection) => {
