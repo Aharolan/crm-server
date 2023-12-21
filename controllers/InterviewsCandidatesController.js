@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const getAll = async (req, res) => {
-    const resArray = await get('InterviewsCandidates')
+    const resArray = await get('interviewsCandidates')
     try {
         res.status(200).send(resArray)
     }
