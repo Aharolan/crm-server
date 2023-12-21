@@ -18,20 +18,20 @@ CREATE TABLE AA (
 );
 DROP TABLE InterviewsCandidates;
 
-CREATE TABLE contract_details (
+CREATE TABLE InterviewsCandidates (
     id INTEGER PRIMARY KEY NOT NULL,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    class INT NOT NULL,
+    stuClass INT NOT NULL,
     city TEXT NOT NULL
 );
 
 ALTER TABLE `Interviews'Candidates`
 RENAME TO InterviewsCandidates;
 
-INSERT INTO InterviewsCandidates (first_name, last_name, class, city)
+INSERT INTO InterviewsCandidates (first_name, last_name, stuClass, city)
 VALUES
-    ('John', 'Doe', 12, 'New York');
+    ('John', 'Doe', 12, 'New York'),
     ('Jane', 'Smith', 11, 'Los Angeles'),
     ('Bob', 'Johnson', 10, 'Chicago'),
     ('Alice', 'Williams', 12, 'Houston'),
