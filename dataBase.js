@@ -1,21 +1,20 @@
-// data base:
-
 const mysql = require("mysql");
+require("dotenv").config(); // Load environment variables
 
 const db = mysql.createConnection({
-  host: "database-1.cxi4w80ccf7t.us-east-1.rds.amazonaws.com",
-  port: "3306",
-  user: "admin",
-  password: "R7biAT^7Gt%5G!i",
-  database: "crm_db",
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 });
 
-const connection = db.connect((err) => {
+db.connect((err) => {
   if (err) {
     console.log(err.message);
     return;
   }
-  console.log("DataBase connected");
+  console.log("Database connected ✅");
 });
 
 module.exports = db;

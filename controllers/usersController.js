@@ -35,7 +35,9 @@ const addUser = async (request, response) => {
 
 const putUser = async (request, response) => {
   await updateData("users", request.body, "id", request.params.id);
-  response.send({ message: `Data for user ${id} updated successfully` });
+  response.send({
+    message: `Data for user ${request.params.id} updated successfully`,
+  });
 };
 
 router.get("/names/:role", getNames);

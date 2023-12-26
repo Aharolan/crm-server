@@ -23,18 +23,23 @@ const get = (collection) => {
 const getRow = (collection, id_column, id) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${collection} WHERE ${id_column} = ?`;
-    db.get(query, id, (err, row) => {
+    db.query(query, [id], (err, row) => {
       if (err) {
         console.error("Error fetching data:", err);
         reject(err);
       } else {
-        resolve(row);
+        resolve(row[0]);
       }
     });
   });
 };
 
 const getRows = (collection, id_column, id) => {
+  if (Array.isArray(id) && id.length == 0) {
+    console.log("not id");
+    return [];
+  }
+
   if (!Array.isArray(id)) {
     id = [id];
   }
@@ -42,7 +47,7 @@ const getRows = (collection, id_column, id) => {
 
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${collection} WHERE ${id_column} IN (${query_rep})`;
-    db.query(query, [id], (err, row) => {
+    db.query(query, [], (err, row) => {
       if (err) {
         console.error("Error fetching data:", err);
         reject(err);
@@ -76,7 +81,7 @@ const add = (collection, data) => {
             reject(err); // Handle errors and reject the Promise
           } else {
             console.log("Last inserted ID:", results[0].lastId);
-            resolve(); // Resolve the Promise on success
+            resolve(results[0].lastId); // Resolve the Promise on success
           }
         });
       }
@@ -86,7 +91,7 @@ const add = (collection, data) => {
 
 const delete_ = (collection, id, id_column = "id") => {
   const query = `DELETE FROM ${collection} WHERE ${id_column} = ? `;
-  db.run(query, id, (err) => {
+  db.query(query, [id], (err) => {
     if (err) {
       console.error("Error deleting data:", err);
     } else {
@@ -96,13 +101,14 @@ const delete_ = (collection, id, id_column = "id") => {
 };
 
 const deleteMultiple = (collection, ids) => {
-  const query = `DELETE FROM ${collection} WHERE id IN (${ids.join(",")})`;
+  const placeholders = ids.map(() => "?").join(",");
+  const query = `DELETE FROM ${collection} WHERE id IN (${placeholders})`;
 
-  db.run(query, (err) => {
+  db.query(query, ids, (err, results) => {
     if (err) {
       console.error("Error deleting data:", err);
     } else {
-      console.log(`Data with id ${ids} deleted successfully`);
+      console.log(`Data with ids ${ids} deleted successfully`);
     }
   });
 };
@@ -118,15 +124,20 @@ const updateData = (collection, data, id, idvalue) => {
     keys.splice(index_of_id, 1);
   }
 
-  const query = `UPDATE ${collection} SET ${keys
-    .map((key) => `${key} = ?`)
-    .join(",")} WHERE ${id} = ${idvalue}`;
+  // Create SET part of the query
+  const setClause = keys.map((key) => `${key} = ?`).join(",");
 
-  db.run(query, values, (err) => {
+  // Create the parameterized query
+  const query = `UPDATE ${collection} SET ${setClause} WHERE ${id} = ?`;
+
+  // Add the idvalue to the values array
+  values.push(idvalue);
+
+  db.query(query, values, (err, results) => {
     if (err) {
       console.error("Error updating data:", err);
     } else {
-      console.log(`Data for  ${keys} updated successfully`);
+      console.log(`Data for ${keys} updated successfully`);
     }
   });
 };
