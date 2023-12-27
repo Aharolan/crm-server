@@ -1,5 +1,5 @@
 const mysql = require("mysql");
-require("dotenv").config(); // Load environment variables
+require("dotenv").config({ path: ".env.local" });
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -11,7 +11,7 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.log(err.message);
+    console.log(`Error connecting to MySQL: \n${err.message}`);
     return;
   }
   console.log("Database connected ✅");
