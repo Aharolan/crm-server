@@ -17,7 +17,7 @@ The database for our project has transitioned from a local file to a remote AWS 
     npm install mysql
     ```
 
-2. Obtain the `.env` file from a team member. This file contains sensitive information for connecting to the database. Copy it to the `Server` folder.
+2. Obtain the `.env.local` file from a team member. This file contains sensitive information for connecting to the database. Copy it to the `Server` folder.
 
 3. Install MySQL Workbench from the Ubuntu Software.
 
@@ -34,11 +34,11 @@ The database for our project has transitioned from a local file to a remote AWS 
    Click the **"+"** icon beside **"MySQL Connections"** on the home screen.
 
 3. **Fill in Connection Details:**
-   - **Connection Name:** Enter a descriptive name (e.g., "AWS RDS Database").
-   - **Hostname:** Provide the AWS RDS MySQL database instance's endpoint.
+   - **Connection Name:** Enter a descriptive name (e.g., "AWS CRM Database").
+   - **Hostname:** Enter the DB_HOST field from the env.local file.
    - **Port:** Use the default port **3306**.
-   - **Username:** Enter the RDS instance's database username.
-   - **Password:** Enter the corresponding password.
+   - **Username:** Use **'admin'**.
+   - **Password:** Enter the DB_PASSWORD field from the env.local file.
 
 4. **Test Connection:**
    Click **"Test Connection"** to verify connectivity.
