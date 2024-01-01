@@ -30,18 +30,26 @@ app.use("/graduates", graduates);
 app.use("/interviews", interviews);
 app.use('/InterviewsCandidates', InterviewsCandidates)
 
-app.get("/getfile/:filename", (req, res) => {
-  let filename = req.params.filename;
-  const encoded = encodeURIComponent(filename);
-  app.use(
-    `/down/${encoded}`,
-    express.static(`./files/${req.params.filename}`, {
-      setHeaders: (res) => {
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename*=UTF-8''${encoded}`
-        );
-      },
+app.use('/class',classController);
+app.use('/courses',coursesController);
+app.use('/files',filesController);
+app.use('/candidate',candidates)
+app.use('/users',users)
+app.use('/sorting_day', sorting_days)
+app.use("/customers", customer);
+app.use("/graduates", graduates);
+app.use("/interviews", interviews);
+app.use('/InterviewsCandidates', InterviewsCandidates)
+
+app.get('/getfile/:filename', (req, res) => {
+    let filename = req.params.filename
+    const encoded = encodeURIComponent(filename);
+    app.use(
+        `/down/${encoded}`, 
+        express.static(`./files/${req.params.filename}`,
+        {setHeaders: (res) => {
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encoded}`);
+        }
     })
   );
   res.send(`/down/${encoded}`);
