@@ -13,7 +13,7 @@ const graduates = require("./controllers/graduatesController.js");
 const interviews = require("./controllers/InterviewsController.js");
 const InterviewsCandidates = require('./controllers/InterviewsCandidatesController.js')
 const StudentDetails = require('./controllers/studentDetailsController')
-
+const GraduatesInterviews = require('./controllers/GraduateInterviewsMemberUpdateController.js')
 
 const app = express();
 app.use(cors());
@@ -30,18 +30,8 @@ app.use("/customers", customer);
 app.use("/graduates", graduates);
 app.use("/interviews", interviews);
 app.use("/InterviewsCandidates", InterviewsCandidates);
-
-app.use("/class", classController);
-app.use("/courses", coursesController);
-app.use("/files", filesController);
-app.use("/candidate", candidates);
-app.use("/users", users);
-app.use("/sorting_day", sorting_days);
-app.use("/customers", customer);
-app.use("/graduates", graduates);
-app.use("/interviews", interviews);
-app.use("/InterviewsCandidates", InterviewsCandidates);
 app.use("/studentDetails", StudentDetails);
+app.use('/GraduatesInterviews', GraduatesInterviews);
 
 app.get("/getfile/:filename", (req, res) => {
   let filename = req.params.filename;
