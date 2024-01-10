@@ -20,6 +20,27 @@ const get = (collection) => {
     });
 };
 
+const getActive = (collection) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM ${collection} WHERE is_active = 1`;
+    db.all(query, (err, rows) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        console.log(rows, collection);
+        resolve(rows);
+      }
+    });
+  })
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+};
+
 const getRow = (collection, id_column, id) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${collection} WHERE ${id_column} = ?`;
@@ -29,6 +50,62 @@ const getRow = (collection, id_column, id) => {
         reject(err);
       } else {
         resolve(row[0]);
+      }
+    });
+  });
+};
+
+const getColumns = (collection, columns) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT ${columns} FROM ${collection} WHERE is_active = 1`;
+    db.query(query, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+};
+
+const getRowAndCounting = (
+  mainCollection,
+  secondCollection,
+  sharedParameter
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM ${mainCollection} JOIN SELECT COUNT(*) FROM ${secondCollection} WHERE ${mainCollection}'.'${sharedParameter} = ${secondCollection}'.'${sharedParameter} `;
+    db.all(query, (err, rows) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  })
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+};
+
+const getRowsActive = (collection, id_column, id) => {
+  if (!Array.isArray(id)) {
+    id = [id];
+  }
+  let query_rep = id.map((ele) => `'${ele}'`).join(",");
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM ${collection} WHERE ${id_column} IN (${query_rep}) AND is_active = 1`;
+    db.all(query, (err, row) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        resolve(row);
       }
     });
   });
@@ -90,7 +167,7 @@ const add = (collection, data) => {
 };
 
 const delete_ = (collection, id, id_column = "id") => {
-  const query = `DELETE FROM ${collection} WHERE ${id_column} = ? `;
+  const query = `DELETE FROM ${collection} WHERE ${id_column} = ${id} `;
   db.query(query, [id], (err) => {
     if (err) {
       console.error("Error deleting data:", err);
@@ -113,7 +190,7 @@ const deleteMultiple = (collection, ids) => {
   });
 };
 
-const updateData = (collection, data, id, idvalue) => {
+const updateData = (collection, data, id, idValue) => {
   let keys = Object.keys(data);
   let values = Object.values(data);
 
@@ -130,8 +207,8 @@ const updateData = (collection, data, id, idvalue) => {
   // Create the parameterized query
   const query = `UPDATE ${collection} SET ${setClause} WHERE ${id} = ?`;
 
-  // Add the idvalue to the values array
-  values.push(idvalue);
+  // Add the idValue to the values array
+  values.push(idValue);
 
   db.query(query, values, (err, results) => {
     if (err) {
@@ -144,10 +221,14 @@ const updateData = (collection, data, id, idvalue) => {
 
 module.exports = {
   get,
+  getActive,
+  getColumns,
   delete_,
   deleteMultiple,
   add,
   updateData,
   getRow,
   getRows,
+  getRowsActive,
+  getRowAndCounting,
 };
