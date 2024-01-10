@@ -6,8 +6,6 @@ const db = require("./../dataBase");
 const addCandidate = async (dataUpdated) => {
   try {
     await add("graduates_interviews", dataUpdated);
-
-    console.log("data Added");
   } catch (error) {
     console.log("something went wrong", error);
   }
@@ -19,7 +17,6 @@ const deleteCandidate = async (interview_id) => {
       interview_id,
       "graduate_interview_id"
     );
-    console.log("data Deleted");
   } catch (error) {
     console.log("something went wrong", error);
   }
@@ -58,7 +55,6 @@ const notInNewRegistered = (id, newRegistered) => {
     return true;
   }
   return false;
-  // return !(newRegistered.some((candidate) => candidate == id));
 };
 const notInRegistered = (candidateId, registered) => {
   let count = 0;
@@ -100,15 +96,10 @@ const putCandidate = async (req, res) => {
   const toAddList = [];
   const toDeleteList = [];
   const interviewId = req.body.interviewId;
-  console.log( "interviewId is: ", interviewId);
   const newRegistered = req.body.candidatesId;
-  console.log("newRegistered is: ", newRegistered);
   const registered = await getRegistered(interviewId);
-  console.log("oldregistered is: ", registered);
   whichToAdd(newRegistered, registered, interviewId, toAddList);
-  console.log("whichToAdd is: ", toAddList);
   whichToDelete(newRegistered, registered, interviewId, toDeleteList);
-  console.log("whichToDelete is: ", toDeleteList);
 
   toAddList.map((candidate) => addCandidate(candidate));
   toDeleteList.map((interviewId) =>
