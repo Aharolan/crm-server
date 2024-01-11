@@ -10,7 +10,7 @@ const users = require("./controllers/usersController");
 const sorting_days = require("./controllers/sortingDayController");
 const customer = require("./controllers/customerController");
 const graduates = require("./controllers/graduatesController.js");
-const interviews = require("./controllers/InterviewsControler.js");
+const interviews = require("./controllers/InterviewsController.js");
 const InterviewsCandidates = require('./controllers/InterviewsCandidatesController.js')
 
 
