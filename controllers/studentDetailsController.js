@@ -15,14 +15,14 @@ const getStudentDetails = (id) => {
         CONCAT(s.first_name, ' ', s.last_name) AS name,
         c.name AS stuClass,
         TIMESTAMPDIFF(YEAR, s.birth_date, CURDATE()) AS age,
-        mt.name AS martial_status,
+        mt.name AS marital_status,
         sum_of_childrens AS children,
         s.city,
         s.phone_number,
         s.email,
         ROUND(AVG(g.num_grade), 1) AS avg_grade,
         ci.image_path,
-        s.candidates_candidate_id  -- Include candidates_candidate_id in the SELECT statement
+        s.candidates_candidate_id
       FROM 
         students s
       JOIN 
