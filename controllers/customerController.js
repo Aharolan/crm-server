@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
@@ -29,7 +28,7 @@ const queryRow = `SELECT
         WHERE 
         t.technology_id = ct.technology_id
         and c.customer_id = ct.customer_id
-        and c.customer_id = 3
+        and c.customer_id = ?
     ) AS technologies,
     c.address,
     c.company_name,
@@ -41,6 +40,7 @@ WHERE
     c.customer_id = ?
 LIMIT 1;
 `;
+
 const getCustomers = () => {
   return new Promise((resolve, reject) => {
     db.query(queryAll, [], (err, rows) => {
@@ -64,12 +64,11 @@ const getAll = async (req, res) => {
 
 const getCustomerRow = (customer_id) => {
   return new Promise((resolve, reject) => {
-    db.query(queryRow, [customer_id], (err, rows) => {
+    db.query(queryRow, [customer_id, customer_id], (err, rows) => {
       if (err) {
         console.error("Error fetching data:", err);
         reject(err);
       } else {
-        console.log(rows, "func");
         resolve(rows[0]);
       }
     });
@@ -104,6 +103,3 @@ router.get("/read/:id", getRow);
 router.put("/update/:id", putCustomers);
 
 module.exports = router;
-
-
-

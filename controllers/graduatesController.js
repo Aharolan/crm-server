@@ -84,7 +84,6 @@ ORDER BY s.last_name`;
 const getRow = async (req, res) => {
   try {
     const responseArray = await getCustomerGraduates(req.params.id);
-    console.log(responseArray);
     res.status(200).send(responseArray);
   } catch (error) {
     res.status(500).send(error);
