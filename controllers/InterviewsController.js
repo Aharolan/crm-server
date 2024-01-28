@@ -1,17 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
-
-const { getColumn, add, updateData, getRows } = require("../baseServer");
-
-const getColumnInfo = async (req, res) => {
-  const column = await getColumn("customers", req.params.columnName);
-  try {
-    res.status(200).send(column);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-};
+const {add, delete_, updateData} = require("../baseServer");
 
 const getInterviews = () => {
   return new Promise((resolve, reject) => {
@@ -60,60 +50,84 @@ const getCompanyInterviews = (id) => {
 const getByCompany = async (req, res) => {
   const resArray = await getCompanyInterviews(req.params.id);
   try {
-    console.log(resArray)
     res.status(200).send(resArray);
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
-const addInterviewDay = async (interviewDayObject, response) => {
+const editInterview = async (request, response) => {
   try {
-    const interview_id = await add("interviews", interviewDayObject);
-    console.log({ message: `interview day added with interview_id: ${interview_id}` });
-    return interview_id
+    const interviewID = await request.params.id;
+    delete_("graduates_interviews", interviewID, "interview_id");
+    delete_("interviews_technologies", interviewID, "interview_id");
+    updateData( "interviews", request.body.updateInterview, "interview_id", interviewID)
+    request.body.students_id.map((students) => {
+      add("graduates_interviews", {student_id: students, interview_id: interviewID})});
+    request.body.technology_id.map((technology) => {
+      add("interviews_technologies", {technology_id: technology, interview_id: interviewID})});
+    for (let technology of request.body.newTechnologies) {
+      const newTechID = await add("technologies", {name: technology});
+      await add("interviews_technologies", {technology_id: newTechID, interview_id: interviewID});
+    }
+    response.status(200).send({ message: "interview updated" });
   } catch (error) {
     response.status(500).send(error);
   }
 };
 
-const addTechnology = async (technology_id, customer_id, response) => {
-  try {
-    technology_id.map( technology => {
-      add("customers_technologies", {customer_id: customer_id, technology_id: technology})
+const infoToEditInterview = (id) => {
+  return new Promise((resolve, reject) => {
+    const query1 = `
+      SELECT
+      CONCAT(s.last_name, ' ', s.first_name) AS name,
+        s.student_id as id,
+        right(c.name, 1) as class_number,
+        CASE WHEN gi.student_id IS NOT NULL THEN TRUE ELSE FALSE END as isSelected
+      FROM students s
+      JOIN classes c ON s.class_id = c.class_id
+      LEFT JOIN graduates_interviews gi ON s.student_id = gi.student_id AND gi.interview_id = ${id}
+      WHERE s.student_status_id = 2
+      ORDER BY s.last_name
+    `;
+    db.query(query1, [], (err1, candidates) => {
+      if (err1) {
+        console.error("Error fetching data from query1:", err1);
+        reject(err1);
+      } else {
+        const query2 = `
+          SELECT 
+            t.technology_id as id,
+            t.name,
+            CASE WHEN it.technology_id IS NOT NULL THEN TRUE ELSE FALSE END as isSelected
+          FROM technologies t
+          LEFT JOIN interviews_technologies it ON t.technology_id = it.technology_id AND it.interview_id = ${id}
+        `;
+
+        db.query(query2, [], (err2, technologies) => {
+          if (err2) {
+            console.error("Error fetching data from query2:", err2);
+            reject(err2);
+          } else {
+            resolve({ candidates: candidates, technologies: technologies }); // Combine results if needed
+          }
+        });
+      }
     });
-    console.log({ message: "tech added " });
-  } catch (error) {
-    response.status(500).send(error);
-  }
+  });
 };
 
-const addGraduatesInterviews = async (students_id, interview_id, response) => {
+const getInterview = async (req, res) => {
+  const resArray = await infoToEditInterview(req.params.id);
   try {
-    students_id.map( student => {
-      add("graduates_interviews", {student_id: student, interview_id: interview_id})
-    });
-    console.log({ message: "graduates_interviews added " });
+    res.status(200).send(resArray);
   } catch (error) {
-    response.status(500).send(error);
+    res.status(500).send(error);
   }
 };
-
-const addInterview = async (request, response) => {
-  try {
-    const { technology_id, students_id, ...interviewDayObject } = request.body;
-    const {customer_id} = request.body;
-    const interview_id = await addInterviewDay(interviewDayObject, response);
-    await addTechnology(technology_id, customer_id, response);
-    await addGraduatesInterviews(students_id, interview_id, response)
-    response.send({ message: "data added " })
-  } catch (error) {
-    response.status(500).send(error);
-  }
-};
-
+    
 router.get("/", getAll);
 router.get("/read/:id", getByCompany);
-router.get("/column/:columnName", getColumnInfo);
-router.post("/create", addInterview);
+router.put("/update/:id", editInterview);
+router.get("/editInterview/:id", getInterview)
 module.exports = router;

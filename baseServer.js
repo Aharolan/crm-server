@@ -1,25 +1,5 @@
 const db = require("./dataBase");
 
-const getColumn = async (collection, columnName) => {
-  return new Promise((resolve, reject) => {
-    const query = `SELECT ${columnName} FROM ${collection}`;
-    db.query(query, (err, rows) => {
-      if (err) {
-        console.error("Error fetching data:", err);
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  })
-  .then((data) => {
-    return data;
-  })
-  .catch((error) => {
-    console.error("Error fetching data:", error);
-  });
-};
-
 const get = (collection) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${collection}`;
@@ -212,5 +192,4 @@ module.exports = {
   getRow,
   getRows,
   updateData1,
-  getColumn,
 };
