@@ -28,7 +28,7 @@ const queryRow = `SELECT
         WHERE 
         t.technology_id = ct.technology_id
         and c.customer_id = ct.customer_id
-        and c.customer_id = ?
+        and c.customer_id = 3
     ) AS technologies,
     c.address,
     c.company_name,
@@ -64,7 +64,7 @@ const getAll = async (req, res) => {
 
 const getCustomerRow = (customer_id) => {
   return new Promise((resolve, reject) => {
-    db.query(queryRow, [customer_id, customer_id], (err, rows) => {
+    db.query(queryRow, [customer_id], (err, rows) => {
       if (err) {
         console.error("Error fetching data:", err);
         reject(err);
