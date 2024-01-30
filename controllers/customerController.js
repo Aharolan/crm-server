@@ -41,6 +41,9 @@ WHERE
 LIMIT 1;
 `;
 
+const queryCompanyName = `SELECT company_name FROM customers;`
+
+
 const getCustomers = () => {
   return new Promise((resolve, reject) => {
     db.query(queryAll, [], (err, rows) => {
@@ -55,6 +58,28 @@ const getCustomers = () => {
 };
 const getAll = async (req, res) => {
   const responseArray = await getCustomers();
+  try {
+    res.status(200).send(responseArray);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const getCompanyName =  () => {
+  return new Promise((resolve, reject) => {
+    db.query(queryCompanyName, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+
+}
+const getAllNames = async (req, res) => {
+  const responseArray = await getCompanyName();
   try {
     res.status(200).send(responseArray);
   } catch (error) {
@@ -101,5 +126,6 @@ const putCustomers = async (req, res) => {
 router.get("/", getAll);
 router.get("/read/:id", getRow);
 router.put("/update/:id", putCustomers);
+router.get("/column/:company_name", getAllNames)
 
 module.exports = router;
