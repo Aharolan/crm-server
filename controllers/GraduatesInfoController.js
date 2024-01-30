@@ -1,4 +1,4 @@
-const { get, updateData } = require("../baseServer");
+const { get, add, updateData } = require("../baseServer");
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
@@ -56,20 +56,24 @@ function getChangedEvents(initial, updated, eventNames) {
     const initialObj = initialMap.get(updatedObj.event_id);
     return initialObj && updatedObj.event_name !== initialObj.event_name;
   });
-  const customize = changedEvents.map((changed) => {
+  const updatedEvents = changedEvents.map((changed) => {
     const eventName = changed.event_name;
-    const eventNameID = eventNames.find((obj) => obj.name === eventName)?.event_name_id;
+    const eventNameID = eventNames.find(
+      (obj) => obj.name === eventName
+    )?.event_name_id;
     const eventID = changed.event_id;
     return { event_name_id: eventNameID, event_id: eventID };
   });
-  return customize;
+  const MilestoneToADd = updated.filter((obj) => !obj.event_id);
+
+  return { updatedEvents, MilestoneToADd };
 }
 
 // Example usage
 // const changedEvents = getChangedEvents(initial, updated, 5);
 // console.log(changedEvents);
 
-const updateDB = async (changedEvents, id) => {
+const updateDB = async (changedEvents, addedEvents, id) => {
   console.log("Update DB called");
   console.log(changedEvents, "changed events");
   for (let changedEvent of changedEvents) {
@@ -77,8 +81,12 @@ const updateDB = async (changedEvents, id) => {
     const customObject = { event_name_id: changedEvent.event_name_id };
     await updateData("events", customObject, "event_id", event_id);
   }
+  for (let addedEvent of addedEvents) {
+    const { date, ...removeEventId } = addedEvent;
+    const customObject = { date: date, student_id: id, event_name_id: 5, position: "bengemin" };
+    await add("events", customObject);
+  }
 };
-
 const putMilestones = async (req, res) => {
   console.log("updated info send from the client", req.body[0]);
   try {
@@ -89,14 +97,24 @@ const putMilestones = async (req, res) => {
     // Wait for the initial data to be fetched before proceeding
     const initial = await getMilestones(studentId);
     const eventNames = await get("event_names");
-    const changedEvents = getChangedEvents(initial, updated, eventNames);
+    const changedEvents = getChangedEvents(
+      initial,
+      updated,
+      eventNames
+    ).updatedEvents;
+    const MilestoneToADd = getChangedEvents(
+      initial,
+      updated,
+      eventNames
+    ).MilestoneToADd;
 
-    updateDB(changedEvents, studentId);
+    updateDB(changedEvents, MilestoneToADd, studentId); // <-- Update this line
   } catch (error) {
     console.log("the error is:", error);
     res.status(500).send(error);
   }
 };
+
 
 router.get("/read/:id", getRow);
 router.put("/update/:id", putMilestones);

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
+const milestones = require ('./GraduatesInfoController')
+
 
 const getInterviewsCandidates = () => {
   return new Promise((resolve, reject) => {
@@ -38,4 +40,7 @@ const getAll = async (req, res) => {
 };
 
 router.get("/", getAll);
+
+router.use('/milestones', milestones)
+
 module.exports = router;
