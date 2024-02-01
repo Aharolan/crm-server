@@ -12,7 +12,7 @@ const fetchInterviewsForStudent = (studentId) => {
       e.text,
       DATE_FORMAT(e.updated_at, '%d/%m/%y') AS date,
       en.name AS event_name,
-      CONCAT(s.first_name, ' ', s.last_name) AS student_name
+      CONCAT(s.first_name, ' ', s.last_name) AS name
     FROM 
       events e
     LEFT JOIN

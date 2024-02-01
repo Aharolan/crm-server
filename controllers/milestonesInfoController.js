@@ -47,7 +47,9 @@ const getAllMilestones = async (req, res) => {
 };
 
 function getChangedEvents(initialMilestones, updatedMilestones, eventNames) {
-  const initialMap = new Map(initialMilestones.map((obj) => [obj.event_id, obj]));
+  const initialMap = new Map(
+    initialMilestones.map((obj) => [obj.event_id, obj])
+  );
 
   const changedEvents = updatedMilestones.filter((updatedObj) => {
     const initialObj = initialMap.get(updatedObj.event_id);
@@ -120,6 +122,7 @@ const putMilestones = async (req, res) => {
     ).MilestoneToAdd;
 
     updateDB(changedEvents, MilestoneToAdd, studentId);
+    res.status(200).send("Milestones updated successfully");
   } catch (error) {
     res.status(500).send(error);
   }
