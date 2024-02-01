@@ -1,16 +1,16 @@
-const { getActive, delete_, add, updateData, getRow, getRowsActive } = require("../baseServer");
+const {  delete_, add, updateData, getRow, getRowsActive } = require("../baseServer");
 const express = require("express");
 const router = express.Router();
 
-const getAllCourses = async (req, res) => {
-    const resArray = await getActive('courses')
-    try {
-        res.status(200).send(resArray)
-    }
-    catch (error) {
-        res.status(500).send(error)
-    }
-}
+// const getAllCourses = async (req, res) => {
+//     const resArray = await getActive('courses')
+//     try {
+//         res.status(200).send(resArray)
+//     }
+//     catch (error) {
+//         res.status(500).send(error)
+//     }
+// }
 
 const deleteCourse = async (req, res) => {
     const id = req.params.id;
@@ -53,7 +53,7 @@ const getCourses = async (req, res) => {
     }
 };
 
-router.get('/', getAllCourses);
+// router.get('/', getAllCourses);
 router.get('/read/:id', getCourse);
 router.get('/reads/:class', getCourses);
 router.delete('/delete/:id', deleteCourse)

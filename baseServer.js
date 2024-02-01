@@ -202,7 +202,7 @@ const updateData =  async (collection, data, id, idvalue) => {
 
 module.exports = {
   get,
-  getActive,
+  // getActive, delete, for merge
   getColumns,
   delete_,
   deleteMultiple,
