@@ -62,7 +62,7 @@ const addCandidate =  async (req, res) => {
 
 const putCandidate = async (req,res) => {    
     await updateData('candidate',req.body,"id",req.params.id)
-    res.send({ message: `Data for candidate_id ${id} updated successfully` });
+    res.send({ message: `Data for candidate_id ${req.params.id} updated successfully` });
 };
 
 const getvaluse = async (req, res) => {

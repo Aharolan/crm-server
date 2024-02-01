@@ -10,11 +10,10 @@ const users = require("./controllers/usersController");
 const sorting_days = require("./controllers/sortingDayController");
 const customer = require("./controllers/customerController");
 const graduates = require("./controllers/graduatesController.js");
-const interviews = require("./controllers/interviewsController.js");
-const InterviewsCandidates = require("./controllers/InterviewsCandidatesController.js");
-const StudentDetails = require("./controllers/studentDetailsController");
-const GraduatesInterviews = require("./controllers/GraduateInterviewsMemberUpdateController.js");
-const GraduateTech = require("./controllers/graduateTechController.js");
+const interviews = require("./controllers/InterviewsController.js");
+const InterviewsCandidates = require('./controllers/InterviewsCandidatesController.js')
+const StudentDetails = require('./controllers/studentDetailsController')
+const GraduatesInterviews = require('./controllers/GraduateInterviewsMemberUpdateController.js')
 
 const app = express();
 app.use(cors());
@@ -30,6 +29,7 @@ app.use("/sorting_day", sorting_days);
 app.use("/customers", customer);
 app.use("/graduates", graduates);
 app.use("/interviews", interviews);
+//TODO: Api's should be with underscore as sorting_day 
 app.use("/InterviewsCandidates", InterviewsCandidates);
 app.use("/studentDetails", StudentDetails);
 app.use("/GraduatesInterviews", GraduatesInterviews);
