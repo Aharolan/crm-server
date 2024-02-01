@@ -2,9 +2,8 @@ const { get } = require("../baseServer");
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
-const milestones = require ("./GraduatesInfoController")
+const milestones = require ("./milestonesInfoController")
 
-const related_tables = [`milestones`]
 
 
 const getGraduates = () => {

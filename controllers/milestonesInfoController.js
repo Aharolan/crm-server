@@ -1,9 +1,9 @@
-const { fetchData, insertData, updateData } = require("../baseServer");
+const { get, add, updateData } = require("../baseServer");
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
 
-const fetchMilestones = (studentId) => {
+const getMilestones = (id) => {
   const query = `
   SELECT 
   e.event_id,
@@ -12,7 +12,7 @@ const fetchMilestones = (studentId) => {
   DATE_FORMAT(e.updated_at, '%d/%m/%y') AS date,
   en.name AS event_name,
   (SELECT DATE_FORMAT(c.start_date, '%d/%m/%y') AS start_date FROM students s JOIN classes c ON s.class_id = c.class_id WHERE s.student_status_id = ${db.escape(
-    studentId
+    id
   )} LIMIT 1) AS start_date,
   CONCAT(s.first_name, ' ', s.last_name) AS name
 FROM 
@@ -24,9 +24,9 @@ RIGHT JOIN
 LEFT JOIN
   students s ON e.student_id = s.student_id
 WHERE
-  e.student_id = ${db.escape(studentId)}`;
+  e.student_id = ${db.escape(id)}`;
   return new Promise((resolve, reject) => {
-    db.query(query, [studentId], (err, rows) => {
+    db.query(query, [id], (err, rows) => {
       if (err) {
         console.error("Error fetching data:", err);
         reject(err);
@@ -37,24 +37,23 @@ WHERE
   });
 };
 
-const getRowData = async (req, res) => {
+const getAllMilestones = async (req, res) => {
   try {
-    const milestonesData = await fetchMilestones(req.params.id);
-    res.status(200).send(milestonesData);
+    const responseArray = await getMilestones(req.params.id);
+    res.status(200).send(responseArray);
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
-function findChangedEvents(initialEvents, updatedEvents, eventNames) {
-  const initialMap = new Map(initialEvents.map((obj) => [obj.event_id, obj]));
+function getChangedEvents(initialMilestones, updatedMilestones, eventNames) {
+  const initialMap = new Map(initialMilestones.map((obj) => [obj.event_id, obj]));
 
-  const changedEvents = updatedEvents.filter((updatedObj) => {
+  const changedEvents = updatedMilestones.filter((updatedObj) => {
     const initialObj = initialMap.get(updatedObj.event_id);
     return initialObj && updatedObj.event_name !== initialObj.event_name;
   });
-
-  const updatedEventsList = changedEvents.map((changed) => {
+  const updatedEvents = changedEvents.map((changed) => {
     const eventName = changed.event_name;
     const eventNameID = eventNames.find(
       (obj) => obj.name === eventName
@@ -62,27 +61,20 @@ function findChangedEvents(initialEvents, updatedEvents, eventNames) {
     const eventID = changed.event_id;
     return { event_name_id: eventNameID, event_id: eventID };
   });
-
-  const milestonesToAdd = updatedEvents.filter((obj) => !obj.event_id);
-  return { updatedEventsList, milestonesToAdd };
+  const MilestoneToAdd = updatedMilestones.filter((obj) => !obj.event_id);
+  return { updatedEvents, MilestoneToAdd };
 }
 
-const updateDatabase = async (changedEvents, addedEvents, studentId) => {
+const updateDB = async (changedEvents, addedEvents, id) => {
   let eventNamesMap = new Map();
   let companiesMap = new Map();
 
   if (addedEvents.length > 0) {
     eventNamesMap = new Map(
-      (await fetchData("event_names")).map((obj) => [
-        obj.name,
-        obj.event_name_id,
-      ])
+      (await get("event_names")).map((obj) => [obj.name, obj.event_name_id])
     );
     companiesMap = new Map(
-      (await fetchData("customers")).map((obj) => [
-        obj.company_name,
-        obj.customer_id,
-      ])
+      (await get("customers")).map((obj) => [obj.company_name, obj.customer_id])
     );
   }
 
@@ -99,41 +91,41 @@ const updateDatabase = async (changedEvents, addedEvents, studentId) => {
     const { date, position, ...removeEventId } = addedEvent;
     const customObject = {
       date: date,
-      student_id: studentId,
+      student_id: id,
       event_name_id: eventNameId,
       position: position,
       customer_id: customerId,
     };
-    await insertData("events", customObject);
+    await add("events", customObject);
   }
 };
 
-const updateMilestones = async (req, res) => {
+const putMilestones = async (req, res) => {
   try {
     const studentId = req.params.id;
-    const updatedEvents = req.body;
 
-    const initialEvents = await fetchMilestones(studentId);
-    const eventNames = await fetchData("event_names");
+    const updated = req.body;
 
-    const changedEvents = findChangedEvents(
-      initialEvents,
-      updatedEvents,
+    const initial = await getMilestones(studentId);
+    const eventNames = await get("event_names");
+    const changedEvents = getChangedEvents(
+      initial,
+      updated,
       eventNames
-    ).updatedEventsList;
-    const milestonesToAdd = findChangedEvents(
-      initialEvents,
-      updatedEvents,
+    ).updatedEvents;
+    const MilestoneToAdd = getChangedEvents(
+      initial,
+      updated,
       eventNames
-    ).milestonesToAdd;
+    ).MilestoneToAdd;
 
-    updateDatabase(changedEvents, milestonesToAdd, studentId);
+    updateDB(changedEvents, MilestoneToAdd, studentId);
   } catch (error) {
     res.status(500).send(error);
   }
 };
 
-router.get("/read/:id", getRowData);
-router.put("/update/:id", updateMilestones);
+router.get("/read/:id", getAllMilestones);
+router.put("/update/:id", putMilestones);
 
 module.exports = router;
