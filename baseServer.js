@@ -100,9 +100,9 @@ const delete_ = (collection, id, id_column = "id") => {
   });
 };
 
-const deleteMultiple = (collection, ids) => {
+const deleteMultiple = (collection, ids, id_column = "id") => {
   const placeholders = ids.map(() => "?").join(",");
-  const query = `DELETE FROM ${collection} WHERE id IN (${placeholders})`;
+  const query = `DELETE FROM ${collection} WHERE ${id_column} IN (${placeholders})`;
 
   db.query(query, ids, (err, results) => {
     if (err) {
@@ -113,7 +113,7 @@ const deleteMultiple = (collection, ids) => {
   });
 };
 
-const updateData = (collection, data, id, idvalue) => {
+const updateData =  async (collection, data, id, idvalue) => {
   let keys = Object.keys(data);
   let values = Object.values(data);
 

@@ -41,8 +41,7 @@ WHERE
 LIMIT 1;
 `;
 
-const queryCompanyName = `SELECT company_name FROM customers;`
-
+const queryCompanyName = `SELECT company_name FROM customers;`;
 
 const getCustomers = () => {
   return new Promise((resolve, reject) => {
@@ -65,7 +64,7 @@ const getAll = async (req, res) => {
   }
 };
 
-const getCompanyName =  () => {
+const getCompanyName = () => {
   return new Promise((resolve, reject) => {
     db.query(queryCompanyName, [], (err, rows) => {
       if (err) {
@@ -76,11 +75,11 @@ const getCompanyName =  () => {
       }
     });
   });
+};
 
-}
-const getAllNames = async (req, res) => {
-  const responseArray = await getCompanyName();
+const getAllCustomers = async (req, res) => {
   try {
+    const responseArray = await getCompanyName();
     res.status(200).send(responseArray);
   } catch (error) {
     res.status(500).send(error);
@@ -126,6 +125,6 @@ const putCustomers = async (req, res) => {
 router.get("/", getAll);
 router.get("/read/:id", getRow);
 router.put("/update/:id", putCustomers);
-router.get("/column/:company_name", getAllNames)
+router.get("/column/:company_name", getAllCustomers);
 
 module.exports = router;
