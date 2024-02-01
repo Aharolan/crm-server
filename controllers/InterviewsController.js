@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
-const {add, delete_, updateData} = require("../baseServer");
+const { add, delete_, updateData } = require("../baseServer");
 
 const getInterviews = () => {
   return new Promise((resolve, reject) => {
@@ -107,8 +107,6 @@ const editInterview = async (request, response) => {
   }
 };
 
-
-
 const infoToEditInterview = (id) => {
   return new Promise((resolve, reject) => {
     const candidatesInfoQuery = `
@@ -158,7 +156,106 @@ const getInterview = async (req, res) => {
     res.status(500).send(error);
   }
 };
-    
+
+const getCustomers = () => {
+  return new Promise((resolve, reject) => {
+    const customersQuery = `
+      SELECT 
+        customer_id as id,
+        company_name as name,
+        false as isSelected
+      FROM crm_db.customers`;
+    db.query(customersQuery, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching customers data:", err);
+        reject(err);
+      } else {
+        resolve(rows);}});
+  });
+};
+
+const getTechnologies = () => {
+  return new Promise((resolve, reject) => {
+    const technologiesQuery = `
+    SELECT 
+      technology_id as id,
+      name,
+      false as isSelected
+      FROM crm_db.technologies`;
+    db.query(technologiesQuery, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching technologies data:", err);
+        reject(err);
+      } else {
+        resolve(rows);}});
+  });
+};
+
+const getCandidates = () => {
+  return new Promise((resolve, reject) => {
+    const candidatesQuery = `
+      SELECT
+        s.student_id as id, 
+        CONCAT(s.last_name,' ', s.first_name) AS name,
+        c.name as classNumber,
+        FALSE as isSelected
+      FROM students s
+      JOIN classes c ON s.class_id = c.class_id
+      WHERE s.student_status_id = 2
+      ORDER BY s.last_name`;
+    db.query(candidatesQuery, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching candidates data:", err);
+        reject(err);
+      } else {
+        resolve(rows);}});
+  });
+};
+
+const getCustomersTechnologies = () => {
+  return new Promise((resolve, reject) => {
+    const customersTechnologiesQuery = `
+      SELECT * FROM crm_db.customers_technologies`;
+    db.query(customersTechnologiesQuery, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching customersTechnologies data:", err);
+        reject(err);
+      } else {
+        resolve(rows);}});
+  });
+};
+
+const newInterview = async (req, res) => {
+  const customers = await getCustomers();
+  const technologies = await getTechnologies();
+  const candidates = await getCandidates();
+  const customersTechnologies = await getCustomersTechnologies();
+  try {
+    res.status(200).send({customers: customers, technologies: technologies, candidates: candidates, customersTechnologies: customersTechnologies});
+    } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const createInterview = async (req, res) => {
+  try {
+    const {candidatesIDs, customerID, date, newTechnologiesNames, position, technologiesIDs} = req.body
+    const interviewID = await add("interviews", {customer_id: customerID, date: date, position: position})
+    await Promise.all(candidatesIDs.map(student => addOperation("graduates_interviews", { student_id: student, interview_id: interviewID })));
+    await Promise.all(technologiesIDs.map(tech => addOperation("interviews_technologies", { technology_id: tech, interview_id: interviewID })));
+
+    for (let technology of newTechnologiesNames) {
+      const newTechID = await addOperation("technologies", { name: technology });
+      await addOperation("interviews_technologies", { technology_id: newTechID, interview_id: interviewID });
+    }
+    res.status(201).send(`new interview with id: ${interviewID} inserted succufully`);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+router.post("/create", createInterview)
+router.get("/newInterview", newInterview);
 router.get("/", getAll);
 router.get("/read/:id", getByCompany);
 router.put("/update/:id", editInterview);
