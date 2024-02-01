@@ -146,8 +146,8 @@ const updateGraduateTech = async (req, res) => {
       if (toAddList.add.length > 0 || toAddList.update.length > 0) {
         await addTech(toAddList.update, toAddList.add, studentId);
       }
-
-      res.status(200).send("Graduate tech updated successfully");
+      const afterUpdatingTech = await getGraduateTechnologies(studentId);
+      res.status(200).send(afterUpdatingTech);
     } catch (error) {
       handleError(res, `Error updating graduates tech, ${error}`);
     }

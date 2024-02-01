@@ -113,7 +113,7 @@ const deleteMultiple = (collection, ids, id_column = "id") => {
   });
 };
 
-const updateData = (collection, data, id, idvalue) => {
+const updateData =  async (collection, data, id, idvalue) => {
   let keys = Object.keys(data);
   let values = Object.values(data);
 

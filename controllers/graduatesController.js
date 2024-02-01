@@ -2,6 +2,8 @@ const { get } = require("../baseServer");
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
+const milestones = require("./graduatesInfoController.js");
+const interviews = require("./graduateInterviewsController.js");
 
 const getGraduates = () => {
   return new Promise((resolve, reject) => {
@@ -91,6 +93,7 @@ const getRow = async (req, res) => {
 };
 
 router.get("/", getAll);
-router.get("/read/:id", getRow)
-
+router.get("/read/:id", getRow);
+router.use("/milestones", milestones);
+router.use("/interviews", interviews);
 module.exports = router;
