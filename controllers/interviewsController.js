@@ -226,11 +226,11 @@ const getCustomersTechnologies = () => {
 };
 
 const newInterview = async (req, res) => {
-  const customers = await getCustomers();
-  const technologies = await getTechnologies();
-  const candidates = await getCandidates();
-  const customersTechnologies = await getCustomersTechnologies();
   try {
+    const customers = await getCustomers();
+    const technologies = await getTechnologies();
+    const candidates = await getCandidates();
+    const customersTechnologies = await getCustomersTechnologies();
     res.status(200).send({customers: customers, technologies: technologies, candidates: candidates, customersTechnologies: customersTechnologies});
     } catch (error) {
     res.status(500).send(error);
