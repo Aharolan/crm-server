@@ -1,7 +1,46 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
-const { updateData1 } = require("../baseServer");
+
+const updateData1 = (collection, oq, newData, idColumn, idValue) => {
+  db.query(oq, [idValue], (err, results) => {
+    if (err) {
+      console.error("Error fetching current data:", err);
+      return;
+    }
+
+    if (results.length === 0) {
+      console.error(`No data found for ${idColumn} ${idValue}`);
+      return;
+    }
+
+    const currentData = results[0];
+    const changedFields = {};
+    for (const key in newData) {
+      if (newData[key] !== currentData[key]) {
+        changedFields[key] = newData[key];
+      }
+    }
+
+    if (Object.keys(changedFields).length === 0) {
+      console.log(`No changes detected for ${idColumn} ${idValue}`);
+      return;
+    }
+    const setClause = Object.keys(changedFields)
+      .map((key) => `${key} = ?`)
+      .join(",");
+    const query = `UPDATE ${collection} SET ${setClause} WHERE ${idColumn} = ?`;
+    const values = Object.values(changedFields);
+    values.push(idValue);
+
+    db.query(query, values, (Err, Results) => {
+      if (Err) {
+        console.error("Error updating data:", Err);
+      } else {
+      }
+    });
+  });
+};
 
 const queryAll = `
 SELECT 
