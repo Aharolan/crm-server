@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../dataBase");
-const { updateData1 } = require("../baseServer");
+const { updateData1, add } = require("../baseServer");
 
 const queryAll = `
 SELECT 
@@ -12,9 +12,11 @@ customer_id as id
 FROM
 customers
 ORDER BY 
-company_name`;
+company_name
+`;
 
-const queryRow = `SELECT 
+const queryRow = `
+SELECT 
     c.contact_email,
     c.contact_phone,
     c.contact_name,
@@ -55,9 +57,10 @@ const getCustomers = () => {
     });
   });
 };
+
 const getAll = async (req, res) => {
-  const responseArray = await getCustomers();
   try {
+    const responseArray = await getCustomers();
     res.status(200).send(responseArray);
   } catch (error) {
     res.status(500).send(error);
@@ -122,8 +125,123 @@ const putCustomers = async (req, res) => {
   });
 };
 
+const getTechs = () => {
+  return new Promise((resolve, reject) => {
+    const queryGetAllTechs = `
+    SELECT 
+        t.technology_id as id,
+        name,
+        FALSE  as isSelected
+    FROM
+        technologies t
+    ORDER BY 
+        name;
+    `;
+    db.query(queryGetAllTechs, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+};
+
+const getAllTechs = async (req, res) => {
+  try {
+    const responseArray = await getTechs();
+    res.status(200).send(responseArray);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const itemsFilter = (items) => {
+  const existingItems = [];
+  const newItems = [];
+
+  for (const item of items) {
+    const { id, name, isSelected } = item;
+    if (isSelected) {
+      if (id !== null && id !== undefined) {
+        existingItems.push(id);
+      } else {
+        newItems.push({ name });
+      }
+    }
+  }
+  const filtererdItems = { existingItems, newItems };
+  return filtererdItems;
+};
+
+const addNewItems = async (collection, newItems) => {
+  const newItemIDs = [];
+  for (const item of newItems) {
+    try {
+      const newItemID = await add(collection, item);
+      newItemIDs.push(String(newItemID));
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+  return newItemIDs;
+};
+
+const techIDsToLink = async (filteredItems) => {
+  const newItemIDs = await addNewItems("technologies", filteredItems.newItems);
+
+  const allItemIDs = newItemIDs.concat(filteredItems.existingItems);
+
+  return allItemIDs;
+};
+
+const addLinkedItem = async (
+  linkedTable,
+  mainEntityLabel,
+  mainEntityID,
+  subEntityLabel,
+  subEntityIDs
+) => {
+  try {
+    subEntityIDs.map(async (subEntityID) => {
+      await add(linkedTable, {
+        [mainEntityLabel]: mainEntityID,
+        [subEntityLabel]: subEntityID,
+      });
+    });
+    res.status(201).send(responseArray);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const addCustomer = async (req, res) => {
+  const technologies = req.body.technologies;
+  const customerData = req.body.input;
+
+  try {
+    const newCustomerID = await add("customers", customerData);
+    const TechIDs = await techIDsToLink(itemsFilter(technologies));
+
+    await addLinkedItem(
+      `customers_technologies`,
+      `customer_id`,
+      newCustomerID,
+      `technology_id`,
+      TechIDs
+    );
+
+    res.status(201).send(responseArray);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 router.get("/", getAll);
 router.get("/read/:id", getRow);
+router.get("/techs", getAllTechs);
+router.post("/create", addCustomer);
 router.put("/update/:id", putCustomers);
 router.get("/column/:company_name", getAllCustomers);
 
