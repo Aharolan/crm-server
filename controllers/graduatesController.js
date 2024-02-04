@@ -8,11 +8,12 @@ const getGraduates = () => {
   return new Promise((resolve, reject) => {
     const query = `
     SELECT
-    (SELECT en.name
-      FROM events e
-      JOIN event_names en ON e.event_name_id = en.event_name_id
-      WHERE e.student_id = s.student_id
-      ORDER BY e.date DESC LIMIT 1) as status,
+    COALESCE(
+      (SELECT en.name
+       FROM events e
+       JOIN event_names en ON e.event_name_id = en.event_name_id
+       WHERE e.student_id = s.student_id
+       ORDER BY e.date DESC LIMIT 1), 'ממתין לראיון') as status,
     c.name as class_name,
     s.email,
     s.phone_number,
