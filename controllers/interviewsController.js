@@ -164,7 +164,7 @@ const getCustomers = () => {
         customer_id as id,
         company_name as name,
         false as isSelected
-      FROM crm_db.customers`;
+      FROM customers`;
     db.query(customersQuery, [], (err, rows) => {
       if (err) {
         console.error("Error fetching customers data:", err);
